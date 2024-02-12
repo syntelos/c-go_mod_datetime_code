@@ -18,23 +18,27 @@ typedef struct {
 
 } gd_repo;
 /*
- * Derive tag and commit from repository.  
+ * Open git repository found at path.
  */
 bool_t gd_repo_open(gd_repo*,char*);
 /*
- * Derive tag and commit from repository.  
+ * Derive commit, oid, and tag from repository.  
  */
 bool_t gd_repo_version(gd_repo*);
 /*
- * Print GOPL GIT VERSION to stdout.
+ * Derive code string from commit, oid, and tag.
  */
-bool_t gd_repo_print(gd_repo*);
+char* gd_code_string(gd_repo*);
+/*
+ * Print code string to stdout.
+ */
+bool_t gd_code_print(gd_repo*);
 /*
  * GitLib shutdown and malloc cleanup.
  */
 void gd_repo_close(gd_repo*);
 /*
- * Derive datetime code from GIT TIME.
+ * Derive datetime code from commit author.
  */
 char* gd_sig_time(const git_time*,char*,size_t);
 

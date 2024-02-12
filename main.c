@@ -39,7 +39,7 @@ int main(int argc, char **argv){
 
     if (gd_repo_version(state)){
 
-      if (gd_repo_print(state)){
+      if (gd_code_print(state)){
 
 	gd_repo_close(state);
 

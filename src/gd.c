@@ -5,6 +5,7 @@
 #include "gd.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 /*
  */
@@ -23,7 +24,10 @@ bool_t gd_repo_version(gd_repo* gd){
     git_strarray_free(&tag_names);
 
     git_revwalk *walk = null;
-    if (0 == git_revwalk_new(&(walk),gd->repo)){
+    if (0 == git_revwalk_new(&(walk),gd->repo) &&
+	0 == git_revwalk_sorting(walk,GIT_SORT_NONE) &&
+	0 == git_revwalk_push_head(walk))
+    {
       /*
        * Walk commits with or without tags.
        */
@@ -66,7 +70,7 @@ bool_t gd_repo_version(gd_repo* gd){
 }
 /*
  */
-bool_t gd_repo_print(gd_repo* gd){
+char* gd_code_string(gd_repo* gd){
   if (null != gd && null != gd->commit){
     const git_signature *sig = git_commit_author(gd->commit);
     if (null != sig){
@@ -78,24 +82,49 @@ bool_t gd_repo_print(gd_repo* gd){
 	char *oid = calloc(1,oid_z);
 	if (oid == git_oid_tostr(oid,oid_z,&(gd->oid))){
 
-	  if (null != gd->tag){
-	    const char *tag = git_tag_name(gd->tag);
+	  oid[12] = 0;
 
-	    fprintf(stdout,"%s-%14s-%12s\n",tag,dat,oid);
+	  size_t buz = 0x40;
+	  char *buf = calloc(1,buz);
+	  if (null != buf){
 
-	    return true;
+	    if (null != gd->tag){
+
+	      const char *tag = git_tag_name(gd->tag);
+
+	      snprintf(buf,buz,"%s-%14s-%12s",tag,dat,oid);
+	    }
+	    else {
+
+	      snprintf(buf,buz,"v0.0.0-%14s-%12s",dat,oid);
+	    }
 	  }
-	  else {
+	  
+	  free(dat);
+	  free(oid);
 
-	    fprintf(stdout,"v0.0.0-%14s-%12s\n",dat,oid);
-
-	    return true;
-	  }
+	  return buf;
 	}
       }
     }
   }
-  return false;
+  return null;
+}
+/*
+ */
+bool_t gd_code_print(gd_repo* gd){
+  char *code = gd_code_string(gd);
+  if (null != code){
+
+    fprintf(stdout,"%s\n",code);
+
+    free(code);
+
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 /*
  */
@@ -127,11 +156,16 @@ void gd_repo_close(gd_repo* gd){
  */
 char* gd_sig_time(const git_time *time, char *string, size_t size){
 
-  time_t t = (time_t)time->time + (time->offset * 60);
+  struct tm *utc = gmtime(&(time->time));
 
-  struct tm *intm = gmtime(&t);
+  int yyyy = (utc->tm_year+1900);
+  int mo = (utc->tm_mon+1);
+  int dd = utc->tm_mday;
+  int hh = utc->tm_hour;
+  int mi = utc->tm_min;
+  int ss = utc->tm_sec;
 
-  strftime(string, size, "%Y%m%d%H%M%S", intm);
+  snprintf(string, size, "%4d%02d%02d%02d%02d%02d",yyyy,mo,dd,hh,mi,ss);
 
   return string;
 }
