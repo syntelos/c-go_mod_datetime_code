@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 John Douglas Pritchard, Syntelos
+ * Copyright 2024 John Douglas Pritchard, Syntelos
  *
  * Redistribution and use in source and binary forms, with
  * or without modification, are permitted provided that the

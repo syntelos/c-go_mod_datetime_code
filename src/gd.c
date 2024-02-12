@@ -74,36 +74,51 @@ char* gd_code_string(gd_repo* gd){
   if (null != gd && null != gd->commit){
     const git_signature *sig = git_commit_author(gd->commit);
     if (null != sig){
-      size_t dat_z = (14+1);
+      size_t dat_z = 0x100;
       char *dat = calloc(1,dat_z);
-      if (dat == gd_sig_time(&(sig->when),dat,dat_z)){
+      if (null != dat){
+
+	const struct tm *utc = gmtime(&(sig->when.time));
+	if (strftime(dat,dat_z,"%Y%m%d%H%M%S",utc)){
       
-	size_t oid_z = (GIT_OID_MAX_HEXSIZE+1);
-	char *oid = calloc(1,oid_z);
-	if (oid == git_oid_tostr(oid,oid_z,&(gd->oid))){
+	  size_t oid_z = (GIT_OID_MAX_HEXSIZE+1);
+	  char *oid = calloc(1,oid_z);
+	  if (oid == git_oid_tostr(oid,oid_z,&(gd->oid))){
 
-	  oid[12] = 0;
+	    oid[12] = 0;
 
-	  size_t buz = 0x40;
-	  char *buf = calloc(1,buz);
-	  if (null != buf){
+	    size_t buz = 0x100;
+	    char *buf = calloc(1,buz);
+	    if (null != buf){
 
-	    if (null != gd->tag){
+	      if (null != gd->tag){
 
-	      const char *tag = git_tag_name(gd->tag);
+		const char *tag = git_tag_name(gd->tag);
 
-	      snprintf(buf,buz,"%s-%14s-%12s",tag,dat,oid);
+		snprintf(buf,buz,"%s-%14s-%12s",tag,dat,oid);
+	      }
+	      else {
+
+		snprintf(buf,buz,"v0.0.0-%14s-%12s",dat,oid);
+	      }
+
+	      free(dat);
+	      free(oid);
+
+	      return buf;
 	    }
 	    else {
-
-	      snprintf(buf,buz,"v0.0.0-%14s-%12s",dat,oid);
+	      free(dat);
+	      free(oid);
 	    }
 	  }
-	  
+	  else {
+	    free(dat);
+	    free(oid);
+	  }
+	}
+	else {
 	  free(dat);
-	  free(oid);
-
-	  return buf;
 	}
       }
     }
@@ -151,21 +166,4 @@ void gd_repo_close(gd_repo* gd){
     free(gd);
   }
   git_libgit2_shutdown();
-}
-/*
- */
-char* gd_sig_time(const git_time *time, char *string, size_t size){
-
-  struct tm *utc = gmtime(&(time->time));
-
-  int yyyy = (utc->tm_year+1900);
-  int mo = (utc->tm_mon+1);
-  int dd = utc->tm_mday;
-  int hh = utc->tm_hour;
-  int mi = utc->tm_min;
-  int ss = utc->tm_sec;
-
-  snprintf(string, size, "%4d%02d%02d%02d%02d%02d",yyyy,mo,dd,hh,mi,ss);
-
-  return string;
 }

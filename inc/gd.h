@@ -26,7 +26,8 @@ bool_t gd_repo_open(gd_repo*,char*);
  */
 bool_t gd_repo_version(gd_repo*);
 /*
- * Derive code string from commit, oid, and tag.
+ * Derive code string from commit, oid, and tag.  Returns a
+ * dynamically allocated bufffer.
  */
 char* gd_code_string(gd_repo*);
 /*
@@ -37,9 +38,5 @@ bool_t gd_code_print(gd_repo*);
  * GitLib shutdown and malloc cleanup.
  */
 void gd_repo_close(gd_repo*);
-/*
- * Derive datetime code from commit author.
- */
-char* gd_sig_time(const git_time*,char*,size_t);
 
 #endif
