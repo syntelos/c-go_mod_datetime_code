@@ -32,6 +32,8 @@ typedef uint8_t bool_t;
 /*
  * Pointer
  */
+typedef void* ptr_t;
+
 #define null 0
 /*
  * File descriptor
